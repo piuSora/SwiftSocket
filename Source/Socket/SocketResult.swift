@@ -14,6 +14,7 @@ public enum SocketError : String {
     case SocketConnectClosed = "SocketConnectClosed"
     case SocketConnectTimeout = "SocketConnectTimeout"
     case SocketSendFail = "SocketSendFail"
+    case SocketSendTimeout = "SocketSendTimeout"
     case SocketListenFail = "SocketListenFail"
 }
 

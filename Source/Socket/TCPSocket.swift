@@ -69,14 +69,23 @@ class TcpClient: Socket {
         }
     }
     
-    func send(bytes : [uint8]) -> Result {
+    func send(bytes : [uint8],timeout : Int? = 10) -> Result {
         var bytesWrite = 0
         var buf = bytes
         let bufPtr = UnsafeRawPointer(&buf)
         
         while bytes.count - bytesWrite > 0{
-            let writeLen = Darwin.write(self.socket_fd, bufPtr.advanced(by: bytesWrite), bytes.count)
+            let writeLen = Darwin.write(self.socket_fd, bufPtr.advanced(by: bytesWrite), bytes.count - bytesWrite)
             if writeLen < 0{
+                if errno == 35{
+                    let ret = select(fd_size: nil, fd: self.socket_fd, status: .SelectStatusWritable, timeout: timeout)
+                    if ret == 0{
+                        return .failure(.SocketSendTimeout)
+                    }else if ret < 0{
+                        return .failure(.SocketSendFail)
+                    }
+                    continue
+                }
                 return .failure(SocketError.SocketSendFail)
             }
             bytesWrite += writeLen
@@ -108,6 +117,7 @@ class TcpClient: Socket {
             }
         }
         repeat{
+            print(expLen - datalen)
             readlen = Darwin.read(socket_fd, bufPtr.advanced(by: datalen), expLen - datalen)
             if readlen > 0 {
                 datalen += readlen

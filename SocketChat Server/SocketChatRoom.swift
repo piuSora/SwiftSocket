@@ -9,9 +9,15 @@
 import Foundation
 
 class ChatClient: UserManager {
-    var msgCallBack:((String)->())?
     
-    init(address : String, port : uint16,msgCallBack : ((String)->())?) {
+    struct MessageInfo : Decodable{
+        var type : String
+        var data : String
+    }
+    
+    var msgCallBack:((MessageInfo)->())?
+    
+    init(address : String, port : uint16,msgCallBack : ((MessageInfo)->())?) {
         let c = TcpClient.init(address: address, port: port)!
         self.msgCallBack = msgCallBack
         super.init(client: c)
@@ -30,7 +36,8 @@ class ChatClient: UserManager {
                 perror("Server Disconnect Or Error")
             }else{
                 if self.msgCallBack != nil{
-                    self.msgCallBack!(msg!)
+                    let data = MessageInfo.decodeJSON(with: msg!)
+                    self.msgCallBack!(data!)
                 }
             }
         }
@@ -60,13 +67,31 @@ class UserManager: NSObject{
     }
     
     //这里的发送需要理解为向服务端保存的客户端socket列表的文件中写入数据，对应的客户端socket接收到可读数据再读取
-    func send(message : String) -> Result {
-        var len = [uint8](message.utf8).count
+    private func send(data : [uint8]) -> Result {
+        var len = data.count
         let lenData = Data.init(bytes: &len, count: 4)
         var ret : Result
         ret = self.client.send(bytes: [uint8](lenData))
-        ret = self.client.send(bytes: [uint8](message.utf8))
+        ret = self.client.send(bytes: data)
         return ret
+    }
+    
+    func send(message : String) -> Result {
+        let data = message.data(using: .utf8)!
+        return send(data: encodeData(type: "text", data: data))
+    }
+    
+    func sendImage(imgData : [uint8]) -> Result {
+        var data = imgData
+        return send(data: encodeData(type: "image", data: Data.init(bytes: &data, count: data.count)))
+    }
+    
+    func encodeData(type : String, data : Data) -> [uint8] {
+        var obj : Dictionary<String,String> = [:]
+        obj["type"] = type
+        obj["data"] = data.base64EncodedString()
+        let json = obj.toJSONString()!
+        return [uint8](json.utf8)
     }
     
     func disconnect() {
@@ -163,7 +188,6 @@ class ChatServer: NSObject {
                 self.removeUser(user: usr)
             }else{
                 self.publishMessage(except: usr, msg: msg!)
-                self.log(msg: msg!)
             }
         }
     }
@@ -191,6 +215,7 @@ class ChatServer: NSObject {
     func log(msg:String) {
         let formatter = DateFormatter.init()
         formatter.dateFormat = "HH:mm:ss"
-        print("\(formatter.string(from: Date()))-Server: \(msg)")
+        let timeinfo = formatter.string(from: Date())
+        print("\(timeinfo)-Server: \(msg)")
     }
 }
