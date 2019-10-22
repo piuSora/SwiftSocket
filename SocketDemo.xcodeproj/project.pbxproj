@@ -28,6 +28,8 @@
 		E9404A5A235DA4B100AB0766 /* TCPSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91754502356ED6E00EB170D /* TCPSocket.swift */; };
 		E9404A5B235DA4B100AB0766 /* YFJSONCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9404A49235D562A00AB0766 /* YFJSONCode.swift */; };
 		E9404A5C235DA4B100AB0766 /* SocketChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91754532356EDFD00EB170D /* SocketChatRoom.swift */; };
+		E9404A5E235EDC1900AB0766 /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = E9404A5D235EDC1900AB0766 /* test.png */; };
+		E9404A62235EDE1700AB0766 /* test.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = E9404A5D235EDC1900AB0766 /* test.png */; };
 		E97B083B234DFE3D000570DC /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97B083A234DFE3D000570DC /* main.swift */; };
 /* End PBXBuildFile section */
 
@@ -40,6 +42,16 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
+		};
+		E9404A61235EDDFB00AB0766 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				E9404A62235EDE1700AB0766 /* test.png in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E97B0835234DFE3D000570DC /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -67,6 +79,7 @@
 		E9404A49235D562A00AB0766 /* YFJSONCode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YFJSONCode.swift; sourceTree = "<group>"; };
 		E9404A51235DA36000AB0766 /* SocketChatDemo Client */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "SocketChatDemo Client"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9404A53235DA36100AB0766 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		E9404A5D235EDC1900AB0766 /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
 		E97B0837234DFE3D000570DC /* SocketChatDemo Server */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "SocketChatDemo Server"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E97B083A234DFE3D000570DC /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -138,6 +151,7 @@
 		E9404A52235DA36100AB0766 /* SocketChatDemo Client */ = {
 			isa = PBXGroup;
 			children = (
+				E9404A5D235EDC1900AB0766 /* test.png */,
 				E9404A53235DA36100AB0766 /* main.swift */,
 			);
 			path = "SocketChatDemo Client";
@@ -201,6 +215,7 @@
 				E9404A4D235DA36000AB0766 /* Sources */,
 				E9404A4E235DA36000AB0766 /* Frameworks */,
 				E9404A4F235DA36000AB0766 /* CopyFiles */,
+				E9404A61235EDDFB00AB0766 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -286,6 +301,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9404A5E235EDC1900AB0766 /* test.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

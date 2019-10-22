@@ -28,8 +28,8 @@ let client1 = ChatClient.init(address: "127.0.0.1", port: 8888) { (msg) in
     }
 }
 
-let path = "/Users/huhaha/Desktop/IMG_1943.JPEG"
-let url = URL.init(fileURLWithPath: path)
+let path = Bundle.main.path(forResource: "test", ofType: "png")
+let url = URL.init(fileURLWithPath: path!)
 let data = try! Data.init(contentsOf: url)
 let buf = [uint8](data)
 let res = client.sendImage(imgData: buf)
