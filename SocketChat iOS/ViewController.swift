@@ -10,10 +10,15 @@ import UIKit
 class ViewController: UIViewController {
     @IBOutlet weak var inputField: UITextView!
     @IBOutlet weak var showView: UITextView!
+    @IBOutlet weak var imageView: UIImageView!
     lazy var client: ChatClient = {
-        return ChatClient.init(address: "10.1.1.40", port: 8888, msgCallBack: { (msg) in
+        return ChatClient.init(address: "10.1.1.40", port: 8888, msgCallBack: {(msg : ChatClient.MessageInfo) in
             DispatchQueue.main.async {
-                self.showView.text = self.showView.text.appending(msg)
+                if msg.type == "text"{
+                    self.showView.text = self.showView.text.appending(msg.data)
+                }else{
+                    self.imageView.image = self.image(withString: msg.data)!
+                }
             }
         })
     }()
@@ -22,6 +27,12 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         self.httpRequest(i:0)
         _ = self.client
+    }
+    
+    func image(withString str : String) -> UIImage? {
+        let imgData = Data.init(base64Encoded: str)!
+        let img = UIImage.init(data: imgData)
+        return img
     }
     
     func httpRequest(i : Int) {

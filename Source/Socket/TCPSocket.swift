@@ -90,6 +90,7 @@ class TcpClient: Socket {
             }
             bytesWrite += writeLen
         }
+        print("should write:\(bytes.count),total write:\(bytesWrite)")
         return .success
     }
     
@@ -106,6 +107,7 @@ class TcpClient: Socket {
     //timeout <= 0 not use select, timeout == nil wait for select forever,timeout > 0 wait until timeout
     open func read(_ length : Int,timeout : Int? = -1) -> [uint8]? {
         let expLen = length
+        var needRetry = false
         var buf = Array<uint8>.init(repeating: 0x0, count: expLen)
         var readlen : Int = 0
         var datalen : Int = 0
@@ -117,15 +119,26 @@ class TcpClient: Socket {
             }
         }
         repeat{
-            print(expLen - datalen)
+            needRetry = false
             readlen = Darwin.read(socket_fd, bufPtr.advanced(by: datalen), expLen - datalen)
             if readlen > 0 {
                 datalen += readlen
             }
-        } while readlen > 0
+            if readlen == -1 {
+                if errno == 35{
+                    let ret = select(fd_size: nil, fd: self.socket_fd, status: .SelectStatusReadable, timeout: timeout)
+                    if ret <= 0{
+                        return nil//timeout(0) or failed(-1)
+                    }
+                    needRetry = true
+                }
+            }
+            print("has read \(datalen),this time read return \(readlen)")
+        } while readlen > 0 || needRetry
         if datalen <= 0 {
             return nil//error(-1) or disconnect(0)
         }else{
+            print("should read: \(length) total read: \(datalen)")
             let rs = buf[0...(datalen-1)];
             return Array(rs)
         }

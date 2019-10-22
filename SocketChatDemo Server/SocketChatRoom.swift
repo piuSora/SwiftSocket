@@ -76,6 +76,11 @@ class UserManager: NSObject{
         return ret
     }
     
+    func send(raw : String) -> Result {
+        let data = raw.data(using: .utf8)!
+        return send(data: [uint8](data))
+    }
+    
     func send(message : String) -> Result {
         let data = message.data(using: .utf8)!
         return send(data: encodeData(type: "text", data: data))
@@ -132,6 +137,7 @@ class ChatServer: NSObject {
     var serverRuning:Bool = false
     var server : TcpServer
     var clientList : [UserManager] = []
+    var arrayLock : NSLock = NSLock()
     
     init?(address: String, port : uint16) {
         guard let s = TcpServer.init(address: address, port: port) else { perror("TcpServer Init Failed"); return nil}
@@ -161,16 +167,18 @@ class ChatServer: NSObject {
     }
     
     func removeUser(user : UserManager) {
+        arrayLock.lock()
         if let index = self.clientList.firstIndex(of: user){
             self.log(msg: "remove user\(user.client.server_addr)")
             self.clientList.remove(at: index)
+            arrayLock.unlock()
         }
     }
     
     func publishMessage(except exceptUsr: UserManager,msg : String ) {
         for usr in self.clientList {
             if usr != exceptUsr{
-                let ret = usr.send(message: msg)
+                let ret = usr.send(raw: msg)
                 _ = handleResult(res: ret){
                     print("publish message failed")
                 }
@@ -187,6 +195,7 @@ class ChatServer: NSObject {
             if isDisconnect{
                 self.removeUser(user: usr)
             }else{
+                print("call back count:",msg?.count)
                 self.publishMessage(except: usr, msg: msg!)
             }
         }

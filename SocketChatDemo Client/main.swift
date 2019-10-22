@@ -1,21 +1,26 @@
 //
 //  main.swift
-//  SocketDemo
+//  SocketChatDemo Client
 //
-//  Created by 呼哈哈 on 2019/10/9.
+//  Created by 呼哈哈 on 2019/10/21.
 //  Copyright © 2019 piu. All rights reserved.
 //
 
 import Foundation
 
-let server = ChatServer.init(address: "0.0.0.0", port: 8888)
-server!.start()
-
 func getRandom(from :UInt32 ,to :UInt32) -> UInt32 {
-     return from + (arc4random()%(to - from + 1))
+    return from + (arc4random()%(to - from + 1))
 }
 
 let client = ChatClient.init(address: "127.0.0.1", port: 8888) { (msg) in
+    if msg.type == "text"{
+        print("client: \(msg)")
+    }else{
+        print("client: recv a image type message: \(msg.data.count)")
+    }
+}
+
+let client1 = ChatClient.init(address: "127.0.0.1", port: 8888) { (msg) in
     if msg.type == "text"{
         print("client: \(msg)")
     }else{
@@ -39,7 +44,6 @@ func sendRandomMsg() {
         print("client: \(msg)")
     }
     
-    
     DispatchQueue.global().async {
         while true{
             let len = getRandom(from: 1, to: 200)
@@ -58,7 +62,6 @@ func sendRandomMsg() {
         }
     }
 }
-
 //sendRandomMsg()
 
 CFRunLoopRun()

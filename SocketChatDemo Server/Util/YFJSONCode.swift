@@ -31,7 +31,12 @@ public extension Decodable{
         guard let data = string?.data(using: .utf8), let jsonData = getInnerObject(inside: data, by: designatedPath) else {
             return nil
         }
-        return try? JSONDecoder().decode(Self.self, from: jsonData)
+        do {
+            return try JSONDecoder().decode(Self.self, from: jsonData)
+        } catch{
+            print(error)
+            return nil
+        }
     }
     
     //jsonObject转换对象或者数组
