@@ -10,8 +10,14 @@ import Foundation
 
 class ChatClient: UserManager {
     
+    enum MessageType : String,Codable {
+        case MessageTypeText = "text"
+        case MessageTypeImage = "image"
+        case MessageTypeFile = "file"
+    }
+    
     struct MessageInfo : Decodable{
-        var type : String
+        var type : MessageType
         var data : String
     }
     
@@ -27,6 +33,7 @@ class ChatClient: UserManager {
     func connect() {
         var ret :Result
         ret = client.connect()
+        MessageInfo.decodeJSON(with: <#T##String?#>)
         if handleResult(res: ret, handle: nil){
             return
         }
@@ -66,6 +73,11 @@ class UserManager: NSObject{
         super.init()
     }
     
+    func forward(raw : String) -> Result {
+        let data = raw.data(using: .utf8)!
+        return send(data: [uint8](data))
+    }
+    
     //这里的发送需要理解为向服务端保存的客户端socket列表的文件中写入数据，对应的客户端socket接收到可读数据再读取
     private func send(data : [uint8]) -> Result {
         var len = data.count
@@ -76,25 +88,29 @@ class UserManager: NSObject{
         return ret
     }
     
-    func send(raw : String) -> Result {
-        let data = raw.data(using: .utf8)!
-        return send(data: [uint8](data))
-    }
-    
     func send(message : String) -> Result {
         let data = message.data(using: .utf8)!
-        return send(data: encodeData(type: "text", data: data))
+        return send(data: encodeData(type: .MessageTypeText, data: data))
     }
     
     func sendImage(imgData : [uint8]) -> Result {
         var data = imgData
-        return send(data: encodeData(type: "image", data: Data.init(bytes: &data, count: data.count)))
+        return send(data: encodeData(type: .MessageTypeImage, data: Data.init(bytes: &data, count: data.count)))
     }
     
-    func encodeData(type : String, data : Data) -> [uint8] {
+    func sendFile(fileData : [uint8]) -> Result {
+        var data = fileData
+        return send(data: encodeData(type: .MessageTypeFile, data: Data.init(bytes: &data, count: data.count)))
+    }
+    
+    func encodeData(type : ChatClient.MessageType, data : Data) -> [uint8] {
         var obj : Dictionary<String,String> = [:]
-        obj["type"] = type
-        obj["data"] = data.base64EncodedString()
+        obj["type"] = type.rawValue
+        if type == .MessageTypeText {
+            obj["data"] = String.init(data: data, encoding: .utf8)
+        }else{
+            obj["data"] = data.base64EncodedString()
+        }
         let json = obj.toJSONString()!
         return [uint8](json.utf8)
     }
@@ -178,7 +194,7 @@ class ChatServer: NSObject {
     func publishMessage(except exceptUsr: UserManager,msg : String ) {
         for usr in self.clientList {
             if usr != exceptUsr{
-                let ret = usr.send(raw: msg)
+                let ret = usr.forward(raw: msg)
                 _ = handleResult(res: ret){
                     print("publish message failed")
                 }

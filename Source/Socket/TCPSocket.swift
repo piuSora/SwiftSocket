@@ -42,12 +42,15 @@ class Socket {
 
 class TcpClient: Socket {
     func connect(timeout : Int = 10) -> Result {
+        //设置fd非阻塞
         _setSocketBlock(on: false)
         withUnsafePointer(to: &self.server_s) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1, {(ptr)->Void in
+                //发起连接
                 _ = Darwin.connect(self.socket_fd, ptr, socklen_t(MemoryLayout<sockaddr>.size))
             })
         }
+        //select判断文件读写状态
         let ret = select(fd_size: nil, fd: self.socket_fd, status: .SelectStatusWritable, timeout: timeout)
         if ret < 0 {
             self.close()
@@ -56,6 +59,7 @@ class TcpClient: Socket {
             self.close()
             return .failure(.SocketConnectTimeout)
         }else{
+            //检查是否连接成功
             var error = 0
             var errlen = socklen_t(MemoryLayout.size(ofValue: error))
             getsockopt(self.socket_fd, SOL_SOCKET, SO_ERROR, &error, &errlen)
@@ -125,7 +129,7 @@ class TcpClient: Socket {
                 datalen += readlen
             }
             if readlen == -1 {
-                if errno == 35{
+                if errno == 35{//EAGAIN 如果超过缓冲区大小
                     let ret = select(fd_size: nil, fd: self.socket_fd, status: .SelectStatusReadable, timeout: timeout)
                     if ret <= 0{
                         return nil//timeout(0) or failed(-1)

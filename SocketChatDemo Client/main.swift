@@ -13,28 +13,30 @@ func getRandom(from :UInt32 ,to :UInt32) -> UInt32 {
 }
 
 let client = ChatClient.init(address: "127.0.0.1", port: 8888) { (msg) in
-    if msg.type == "text"{
+    if msg.type == .MessageTypeText{
         print("client: \(msg)")
     }else{
-        print("client: recv a image type message: \(msg.data.count)")
     }
 }
 
 let client1 = ChatClient.init(address: "127.0.0.1", port: 8888) { (msg) in
-    if msg.type == "text"{
+    if msg.type == .MessageTypeText{
         print("client: \(msg)")
     }else{
-        print("client: recv a image type message")
+        let data = Data.init(base64Encoded: msg.data)
+        let fm = FileManager.default
+        let res = fm.createFile(atPath: "/Users/huhaha/Desktop/backup/down.data", contents: data, attributes: nil)
+        print("creat \(res)")
     }
 }
 
-let path = Bundle.main.path(forResource: "test", ofType: "png")
-let url = URL.init(fileURLWithPath: path!)
+//let path = Bundle.main.path(forResource: "test", ofType: "png")
+let url = URL.init(fileURLWithPath: "/Users/huhaha/Desktop/test.data")
 let data = try! Data.init(contentsOf: url)
 let buf = [uint8](data)
 let res = client.sendImage(imgData: buf)
 if res.isSuccess {
-    print ("Image Send Success")
+    print ("File Send Success")
 }else{
     perror(res.error)
 }
